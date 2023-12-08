@@ -310,7 +310,7 @@ function serialEvent() {
   //check to see that there's actually a string there:
 
   //let inString =serial.read();
-  console.log(inString)
+  // console.log(inString)
   
   let buttonState;
   let doorState;
@@ -320,14 +320,14 @@ function serialEvent() {
     console.log(sensors);
     
 //光敏电阻
-    buttonState = Number(sensors[2]);
+    buttonState = Number(sensors[0]);
     //console.log(sensors);
-    //console.log(buttonState);
+    console.log(buttonState);
 
     if (buttonState != lastButtonState && lastButtonState >= 100) {
-      //console.log('hi')
+      console.log('hi')
       if(buttonState < 100 && buttonState != 0){
-        
+
         handleCaptureMe();
         // snapshots.push(video.get())     
         
@@ -343,7 +343,7 @@ function serialEvent() {
     
 //door sensor
     
-    doorState= Number(sensors[3]);
+    doorState= Number(sensors[1]);
     
     if(doorState!= lastDoorState){
       
