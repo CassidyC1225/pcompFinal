@@ -7,6 +7,7 @@ let inData; // for incoming serial data
 //let y = 0;
 //let s = 50;
 let lastButtonState = 0;
+let lastDoorState=0;
 
 let video; // 创建视频变量
 let captureMe, playBtn; // 创建按钮变量
@@ -301,6 +302,7 @@ class Box {
 }
 
 function serialEvent() {
+
   // read a string from the serial port
   // until you get carriage return and newline:
   let inString = serial.readStringUntil("\r\n");
@@ -308,35 +310,53 @@ function serialEvent() {
   //check to see that there's actually a string there:
 
   //let inString =serial.read();
-  //console.log(inString)
+  console.log(inString)
   
   let buttonState;
+  let doorState;
 
   if (inString != null) {
-    let sensors = split(inString, " ");
-    //console.log(sensors)
-    buttonState = Number(sensors[2]);
+    let sensors = split(inString, ",");
     console.log(sensors);
+    
+//光敏电阻
+    buttonState = Number(sensors[2]);
+    //console.log(sensors);
     //console.log(buttonState);
 
-    if (buttonState != lastButtonState && lastButtonState >= 5) {
+    if (buttonState != lastButtonState && lastButtonState >= 100) {
       //console.log('hi')
-      if(buttonState < 5){
+      if(buttonState < 100 && buttonState != 0){
         
-        console.log("close");
         handleCaptureMe();
         // snapshots.push(video.get())     
         
       }
-      if(buttonState==0){
+//       if(buttonState==0){
         
-        // console.log("open")
         
-      }    
-    }
+//       }    
+ }
     
     lastButtonState= buttonState;
-    //console.log(lastButtonState);
+    
+    
+//door sensor
+    
+    doorState= Number(sensors[3]);
+    
+    if(doorState!= lastDoorState){
+      
+      if(doorState==1){
+       handlePlay(); 
+      }
+       if(doorState==0){
+         reset();
+       }
+      
+    }
+    
+   lastDoorState=doorState
   
     //y = Number(sensors[1]);
    // s = Number(sensors[2]);
@@ -348,7 +368,6 @@ function serialEvent() {
 /////////////////////////////////////////////
 // UTILITY FUNCTIONS TO MAKE CONNECTIONS  ///
 /////////////////////////////////////////////
-
 // if there's no port selected,
 // make a port select button appear:
 function makePortButton() {
@@ -369,7 +388,7 @@ function choosePort() {
 function openPort() {
   // wait for the serial.open promise to return,
   // then call the initiateSerial function
-  serial.open().then(initiateSerial);
+  serial.open({baudRate: 115200}).then(initiateSerial);
 
   // once the port opens, let the user know:
   function initiateSerial() {
@@ -397,3 +416,8 @@ function portDisconnect() {
   serial.close();
   console.log("port disconnected");
 }
+
+// function mousePressed (){
+// serial.write ("x");
+// }
+
