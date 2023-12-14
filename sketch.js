@@ -42,27 +42,31 @@ function setup() {
 
   serial.on("close", makePortButton);
   textSize(40);
+  push();
   
-  createCanvas(windowWidth, windowHeight); // 创建画布
+  createCanvas(windowHeight*1.15, windowHeight); // 创建画布
+  background(255);
+  pop();
 
   matter.init(); // 初始化物理引擎
   initBorder(null, barriers, 20); // 初始化边界
 
   video = createCapture(VIDEO); // 创建视频捕捉对象
-  video.size(200, 160); // 设置视频尺寸
+  video.size(100, 80); // 设置视频尺寸
   video.hide(); // 隐藏视频
 
-  captureMe = createButton("Capture me"); // 创建捕捉按钮
-  captureMe.position(0, 0); // 设置按钮位置
+  captureMe = createButton("Cap"); // 创建捕捉按钮
+  captureMe.position(0, 50); // 设置按钮位置
   captureMe.mousePressed(handleCaptureMe); // 绑定按钮事件
 
   playBtn = createButton("Play"); // 创建播放按钮
-  playBtn.position(100, 0); // 设置按钮位置
+  playBtn.position(0, 100); // 设置按钮位置
   playBtn.mousePressed(handlePlay); // 绑定按钮事件
 
-  playBtn = createButton("Clear"); // 创建播放按钮
-  playBtn.position(160, 0); // 设置按钮位置
-  playBtn.mousePressed(reset); // 绑定按钮事件
+  clearBtn = createButton("Clear"); // 创建播放按钮
+  clearBtn.position(0, 0); // 设置按钮位置
+  clearBtn.mousePressed(reset); // 绑定按钮事件
+  
 }
 
 // 初始化边界
@@ -116,7 +120,7 @@ function initBorder(points, list, w) {
 }
 
 function draw() {
-  background(0); // 设置背景色为黑色
+  background(255); // 设置背景色为黑色
   for (let i = 0; i < captures.length; i++) {
     captures[i].display(); // 显示捕捉对象
   }
@@ -161,6 +165,7 @@ function reset() {
   propeller = [];
   barriers = [];
   initBorder(null, barriers, 20); // 重新初始化边界
+  window.location.reload();
 }
 
 function handlePlay() {
