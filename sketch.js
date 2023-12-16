@@ -7,7 +7,7 @@ let inData; // for incoming serial data
 //let y = 0;
 //let s = 50;
 let lastButtonState = 0;
-let lastDoorState=0;
+let lastDoorState = 0;
 
 let video; // 创建视频变量
 let captureMe, playBtn; // 创建按钮变量
@@ -17,9 +17,10 @@ let barriers = []; // 创建边界数组
 let propeller = []; // 创建旋转物体数组
 let isPlaying = false; // 是否正在播放
 let debug = false;
+let isClearing = false; //是否正在清空
 
 function setup() {
-  
+
   // createCanvas(windowWidth, windowHeight); // make the canvas
   // check to see if serial is available:
   if (!navigator.serial) {
@@ -43,8 +44,8 @@ function setup() {
   serial.on("close", makePortButton);
   textSize(40);
   push();
-  
-  createCanvas(windowHeight*1.15, windowHeight); // 创建画布
+
+  createCanvas(windowHeight * 1.15, windowHeight); // 创建画布
   background(255);
   pop();
 
@@ -66,7 +67,7 @@ function setup() {
   clearBtn = createButton("Clear"); // 创建播放按钮
   clearBtn.position(0, 0); // 设置按钮位置
   clearBtn.mousePressed(reset); // 绑定按钮事件
-  
+
 }
 
 // 初始化边界
@@ -123,7 +124,12 @@ function draw() {
   background(255); // 设置背景色为黑色
   for (let i = 0; i < captures.length; i++) {
     captures[i].display(); // 显示捕捉对象
+    if (captures[i].y > height) {
+      captures[i].forgetBox();
+    }
   }
+
+  if (captures.length <= 0 && isClearing) clear();
 
   for (let i = 0; i < propeller.length; i++) {
     propeller[i].setAngle(propeller[i].getAngle() + 0.04); // 旋转物体
@@ -153,20 +159,42 @@ function handleCaptureMe() {
   }
 }
 
+
 function reset() {
+  console.log('hi');
+  isClearing = true;
   isPlaying = false;
-  for (let i = 0; i < captures.length; i++) {
-    captures[i].forgetBox(); // 清除捕捉对象
-  }
-  captures = [];
+  // for (let i = 0; i < captures.length; i++) {
+  //   captures[i].forgetBox(); // 清除捕捉对象
+  // }
+  // captures = [];
   for (let i = 0; i < propeller.length; i++) {
     matter.forget(propeller[i]); // 清除旋转物体
   }
   propeller = [];
+  //barriers = [];
+  // initBorder(null, barriers, 20); // 重新初始化边界
+  // window.location.reload();
+
+  for (let i = 0; i < barriers.length; i++) {
+    matter.forget(barriers[i]); // 清除旋转物体
+  }
+  
+  // barriers.splice(3, 2);
+  console.log(barriers);
+}
+
+function clear() {
+
+  isClearing = false;
+  for (let i = 0; i < propeller.length; i++) {
+    matter.forget(propeller[i]); // 清除旋转物体
+  }
   barriers = [];
   initBorder(null, barriers, 20); // 重新初始化边界
-  window.location.reload();
+  //window.location.reload();
 }
+
 
 function handlePlay() {
   initBorder(
@@ -316,55 +344,55 @@ function serialEvent() {
 
   //let inString =serial.read();
   // console.log(inString)
-  
+
   let buttonState;
   let doorState;
 
   if (inString != null) {
     let sensors = split(inString, ",");
     console.log(sensors);
-    
-//光敏电阻
+
+    //光敏电阻
     buttonState = Number(sensors[0]);
     //console.log(sensors);
     console.log(buttonState);
 
     if (buttonState != lastButtonState && lastButtonState >= 100) {
       console.log('hi')
-      if(buttonState < 100 && buttonState != 0){
+      if (buttonState < 100 && buttonState != 0) {
 
         handleCaptureMe();
         // snapshots.push(video.get())     
-        
+
       }
-//       if(buttonState==0){
-        
-        
-//       }    
- }
-    
-    lastButtonState= buttonState;
-    
-    
-//door sensor
-    
-    doorState= Number(sensors[1]);
-    
-    if(doorState!= lastDoorState){
-      
-      if(doorState==1){
-       handlePlay(); 
-      }
-       if(doorState==0){
-         reset();
-       }
-      
+      //       if(buttonState==0){
+
+
+      //       }    
     }
-    
-   lastDoorState=doorState
-  
+
+    lastButtonState = buttonState;
+
+
+    //door sensor
+
+    doorState = Number(sensors[1]);
+
+    if (doorState != lastDoorState) {
+
+      if (doorState == 1) {
+        handlePlay();
+      }
+      if (doorState == 0) {
+        reset();
+      }
+
+    }
+
+    lastDoorState = doorState
+
     //y = Number(sensors[1]);
-   // s = Number(sensors[2]);
+    // s = Number(sensors[2]);
 
     serial.write("x");
   }
@@ -393,7 +421,7 @@ function choosePort() {
 function openPort() {
   // wait for the serial.open promise to return,
   // then call the initiateSerial function
-  serial.open({baudRate: 115200}).then(initiateSerial);
+  serial.open({ baudRate: 115200 }).then(initiateSerial);
 
   // once the port opens, let the user know:
   function initiateSerial() {
